@@ -1,9 +1,11 @@
 const express = require("express");
-router = express.Router();
+const router = express.Router();
 const authController = require("../controllers/auth/userController");
 const uploadFile = require("../middlewares/imageUploadMiddleware");
+const authMiddleware = require("../middlewares/authMiddleware");
 
-router.get("/test", authController.test);
+// all user authentication route
+router.get("/test", authMiddleware, authController.test);
 router.post("/send-otp", authController.sendOtp);
 router.post("/verify-email", authController.verifyEmail);
 router.post(

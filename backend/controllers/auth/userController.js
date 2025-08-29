@@ -2,14 +2,14 @@ const db = require("../../db/db");
 const { success, error } = require("../../helpers/response");
 const { generateOtp } = require("../../services/generateOtp");
 const { sendmail } = require("../../services/sendMail");
-const {
-  verificationEmailTemplate,
-} = require("../../templates/verificationEmail");
 const bcrypt = require("bcrypt");
+const { generateJwtToken } = require("../../common/jwt");
+const {verificationEmailTemplate} = require("../../templates/verificationEmail");
+
 // test
 const test = async (req, res) => {
   try {
-    return success(res, "test route is working...", 200, "route working");
+    return success(res, { user: req.user }, 200, "route working");
   } catch (err) {
     return error(res, "Something went wrong", err.message, 500);
   }
@@ -44,7 +44,7 @@ const sendOtp = async (req, res) => {
         html: verificationEmailTemplate({ otp }),
       });
 
-      return success(res, "Otp sent, check your inbox");
+      return success(res, "Otp sent, check your inbox", 200);
     }
 
     // for phone later
@@ -125,7 +125,7 @@ const createProfile = async (req, res) => {
       profile_pic: filename,
       updated_at: new Date(),
     });
-    return success(res, "Profile created successfully", 200);
+    return success(res, "Profile created successfully", 201);
   } catch (err) {
     return error(res, err.message, "something went wrong!", 500);
   }
@@ -142,15 +142,15 @@ const setPassword = async (req, res) => {
     }
 
     // check if user exists
-    const user = await db("users").where({ email }).first();
-    if (!user) {
+    const userExists = await db("users").where({ email }).first();
+    if (!userExists) {
       return error(res, "User not found", 404);
     }
 
     // check if password already set
-    if (user.password) {
-      return error(res, "Password already set. Please login.", 400);
-    }
+    // if (user.password) {
+    //   return error(res, "Password already set. Please login.", 400);
+    // }
 
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -158,13 +158,44 @@ const setPassword = async (req, res) => {
     // update user with password
     await db("users").where({ email }).update({
       password: hashedPassword,
+      status: true,
       updated_at: new Date(),
     });
 
-    return success(res, "Password created successfully.", 200);
+    // creating the token with user details without passsword
+    const user = await db("users")
+      .where({ email })
+      .select(
+        "id",
+        "role",
+        "name",
+        "userName",
+        "email",
+        "emailOtp",
+        "phone",
+        "phoneOtp",
+        "mobileVerified",
+        "emailVerified",
+        "profile_pic",
+        "status",
+        "created_at",
+        "updated_at"
+      )
+      .first();
+
+    //common function to create the token
+    const token = generateJwtToken(user);
+    return success(
+      res,
+      { token },
+
+      201,
+      "Password created Successfully!"
+    );
   } catch (err) {
-    return error(res, "Something went wrong", 400);
+    return error(res, err.message, "Something went wrong", 400);
   }
 };
+
 
 module.exports = { test, sendOtp, verifyEmail, createProfile, setPassword };

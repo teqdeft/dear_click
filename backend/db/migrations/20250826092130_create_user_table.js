@@ -10,13 +10,13 @@ exports.up = function (knex) {
     table.string("userName", 20).nullable().defaultTo(null);
     table.string("email", 100).nullable().defaultTo(null);
     table.string("emailOtp", 20).nullable().defaultTo(null);
+    table.boolean("emailVerified").defaultTo(false);
     table.string("phone", 20).nullable().defaultTo(null);
     table.string("phoneOtp", 20).nullable().defaultTo(null);
     table.boolean("mobileVerified").defaultTo(false);
-    table.boolean("emailVerified").defaultTo(false);
     table.string("password", 255);
     table.string("profile_pic", 255).nullable().defaultTo(null);
-    table.boolean("status").defaultTo(true);
+    table.boolean("status").defaultTo(false);
     table.timestamp("created_at").defaultTo(knex.raw("CURRENT_TIMESTAMP"));
     table
       .timestamp("updated_at")
