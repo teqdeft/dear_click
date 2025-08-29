@@ -57,4 +57,5 @@ const createUserInterests = async (req, res) => {
     return error(res, "Failed to update user interests", err.message, 500);
   }
 };
+
 module.exports = { getInterests, createUserInterests };
