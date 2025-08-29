@@ -23,4 +23,19 @@ function error(
     },
   });
 }
-module.exports = { success, error };
+
+const validation = (response, errors) => {
+  response.setHeader('Content-Type', 'application/json');
+  response.json({
+    success: false,   // Indicates an error response
+    error: {
+      errors: (typeof errors.error !== 'undefined') ? errors.error : '',
+      message: (typeof errors[0].msg !== 'undefined') ? errors[0].msg : '',
+      code: 422, // A custom error code (default is 'GENERIC_ERROR')
+    },
+  });
+  return response;
+};
+
+
+module.exports = { success, error, validation };
