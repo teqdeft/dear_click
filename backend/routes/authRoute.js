@@ -5,7 +5,7 @@ const uploadFile = require("../middlewares/imageUploadMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
 
 // user authentication routes
-router.get("/test", authMiddleware, authController.test);
+router.get("/test", authController.test);
 router.post("/send-otp", authController.sendOtp);
 router.post("/verify-email", authController.verifyEmail);
 router.post(
